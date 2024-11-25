@@ -1,4 +1,5 @@
 const { Server } = require('socket.io')
+const { executeCodeSafely } = require('../utils/executeCode')
 
 let rooms = {}
 
@@ -15,7 +16,7 @@ const initSocket = server => {
 
         socket.on('joinRoom', roomId => {
             if (!rooms[roomId]) {
-                rooms[roomId] = { mentor: null, students: [] }
+                rooms[roomId] = { mentor: null, students: [], code: '' }
             }
 
             const room = rooms[roomId]
@@ -29,30 +30,26 @@ const initSocket = server => {
             }
 
             socket.join(roomId)
-
             io.in(roomId).emit('updateUsersCount', room.students.length + 1)
-            console.log(`Client ${socket.id} joined room ${roomId}`)
+            socket.emit('codeUpdate', room.code)
 
             socket.on('codeChange', code => {
-                console.log(`Code change in room ${roomId} by ${socket.id}:`, code)
+                room.code = code
                 socket.to(roomId).emit('codeUpdate', code)
             })
 
-            socket.on('disconnect', () => {
-                console.log('Client disconnected:', socket.id)
+            // Handle code execution
+            socket.on('executeCode', async code => {
+                const result = await executeCodeSafely(code)
+                socket.emit('executionResult', result) // Send the result back to the client
+            })
 
+            socket.on('disconnect', () => {
                 if (room.mentor === socket.id) {
-                    console.log(`Mentor left room ${roomId}`)
-                    if (room.students.length === 0) {
-                        delete rooms[roomId]
-                    } else {
-                        room.mentor = null
-                        io.in(roomId).emit('mentorLeft')
-                    }
+                    io.in(roomId).emit('mentorLeft')
+                    delete rooms[roomId]
                 } else {
                     room.students = room.students.filter(id => id !== socket.id)
-                    console.log(`Student ${socket.id} left room ${roomId}`)
-
                     if (room.students.length === 0 && !room.mentor) {
                         delete rooms[roomId]
                     } else {
