@@ -38,10 +38,9 @@ const initSocket = server => {
                 socket.to(roomId).emit('codeUpdate', code)
             })
 
-            // Handle code execution
             socket.on('executeCode', async code => {
                 const result = await executeCodeSafely(code)
-                socket.emit('executionResult', result) // Send the result back to the client
+                socket.emit('executionResult', result)
             })
 
             socket.on('disconnect', () => {
