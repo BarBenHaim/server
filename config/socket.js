@@ -44,6 +44,8 @@ const initSocket = server => {
             })
 
             socket.on('disconnect', () => {
+                console.log(`Client disconnected: ${socket.id}`)
+
                 if (room.mentor === socket.id) {
                     io.in(roomId).emit('mentorLeft')
                     delete rooms[roomId]
@@ -55,6 +57,9 @@ const initSocket = server => {
                         io.in(roomId).emit('updateUsersCount', room.students.length + 1)
                     }
                 }
+
+                // Clean up socket listeners to avoid duplicate events
+                socket.removeAllListeners()
             })
         })
     })
