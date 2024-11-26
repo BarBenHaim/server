@@ -6,10 +6,7 @@ let rooms = {}
 const initSocket = server => {
     const io = require('socket.io')(server, {
         cors: {
-            origin: [
-                'http://localhost:3000', // Local frontend for development
-                'https://moveo-bar-ben-haim.onrender.com', // Production frontend
-            ],
+            origin: ['http://localhost:3000', 'https://moveo-bar-ben-haim.onrender.com'],
             methods: ['GET', 'POST'],
         },
     })
