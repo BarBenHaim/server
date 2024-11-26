@@ -4,12 +4,16 @@ const { executeCodeSafely } = require('../utils/executeCode')
 let rooms = {}
 
 const initSocket = server => {
-    const io = new Server(server, {
+    const io = require('socket.io')(server, {
         cors: {
-            origin: '*',
+            origin: [
+                'http://localhost:3000', // Local frontend for development
+                'https://moveo-bar-ben-haim.onrender.com', // Production frontend
+            ],
             methods: ['GET', 'POST'],
         },
     })
+
     console.log('here it prints ')
     io.on('connection', socket => {
         console.log('New client connected:', socket.id)
