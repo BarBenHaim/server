@@ -4,10 +4,8 @@ const CodeBlock = require('../models/CodeBlock')
 let rooms = {}
 const fetchInitialCodeForRoom = async roomId => {
     try {
-        // Query the database for the code block with the given ID
         const codeBlock = await CodeBlock.findById(roomId)
 
-        // If found, return the initialCode
         if (codeBlock) {
             return codeBlock.initialCode
         } else {
@@ -21,14 +19,13 @@ const fetchInitialCodeForRoom = async roomId => {
 }
 
 const initSocket = server => {
-    const io = require('socket.io')(server, {
+    const io = new Server(server, {
         cors: {
             origin: ['http://localhost:3000', 'https://moveo-bar-ben-haim.onrender.com'],
             methods: ['GET', 'POST'],
         },
     })
 
-    console.log('here it prints ')
     io.on('connection', socket => {
         console.log('New client connected:', socket.id)
 
